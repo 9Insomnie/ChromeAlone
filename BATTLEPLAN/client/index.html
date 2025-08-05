@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChromeAlone Server Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.8;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+
+        button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-online { background-color: #27ae60; }
+        .status-offline { background-color: #e74c3c; }
+
+        .response-area {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .agent-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .agent-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .agent-id {
+            font-family: monospace;
+            background: #ecf0f1;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .success {
+            background: #27ae60;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .quick-commands {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .quick-cmd {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .quick-cmd:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4);
+        }
+
+        .quick-cmd:active {
+            transform: translateY(0);
+        }
+
+        .quick-cmd:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .task-history-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .task-id {
+            font-family: monospace;
+            background: #ecf0f1;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .task-status {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background: #f39c12;
+            color: white;
+        }
+
+        .status-completed {
+            background: #27ae60;
+            color: white;
+        }
+
+        .status-failed {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .task-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .task-result {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .no-history {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        .tab-nav {
+            display: flex;
+            border-bottom: 2px solid #ecf0f1;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #7f8c8d;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: #3498db;
+            background: #f8f9fa;
+        }
+
+        .tab-btn.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-controls {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .tab-controls .form-group {
+            flex: 1;
+            min-width: 200px;
+            margin-bottom: 0;
+        }
+
+        .tab-controls button {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            white-space: nowrap;
+            flex-shrink: 0;
+            align-self: flex-end;
+        }
+
+        .tab-controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .unread-badge {
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 8px;
+            min-width: 18px;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .captured-item {
+            position: relative;
+        }
+
+        .captured-item.unread {
+            border-left: 4px solid #e74c3c;
+            background: #fdf2f2;
+        }
+
+        .captured-item.unread::before {
+            content: "NEW";
+            position: absolute;
+            top: 45px;
+            right: 10px;
+            background: #e74c3c;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            z-index: 1;
+        }
+
+        .mark-read-btn {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .mark-read-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(39, 174, 96, 0.4);
+        }
+
+        #markAllAsRead {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        #markAllAsRead:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .browser-breadcrumb {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .browser-up-btn {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .browser-up-btn:hover {
+            background: linear-gradient(135deg, #7f8c8d, #6c7b7d);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(127, 140, 141, 0.4);
+        }
+
+        .browser-up-btn:active {
+            transform: translateY(0);
+        }
+
+        #browserPathDisplay {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .browser-content {
+            min-height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: white;
+        }
+
+        .browser-placeholder {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 50px 20px;
+        }
+
+        .browser-item {
+            display: grid;
+            grid-template-columns: 30px 1fr 120px 150px;
+            gap: 10px;
+            align-items: center;
+            padding: 10px 15px;
+            border-bottom: 1px solid #ecf0f1;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .browser-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .browser-item:last-child {
+            border-bottom: none;
+        }
+
+        .browser-item.folder {
+            cursor: pointer;
+        }
+
+        .browser-item.file {
+            cursor: default;
+            opacity: 0.7;
+        }
+
+        .browser-icon {
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .browser-name {
+            font-family: monospace;
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .browser-size {
+            font-family: monospace;
+            font-size: 12px;
+            color: #7f8c8d;
+            text-align: right;
+        }
+
+        .browser-date {
+            font-family: monospace;
+            font-size: 12px;
+            color: #7f8c8d;
+            text-align: right;
+        }
+
+        .browser-header {
+            display: grid;
+            grid-template-columns: 30px 1fr 120px 150px;
+            gap: 10px;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .browser-header .browser-name,
+        .browser-header .browser-size,
+        .browser-header .browser-date {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 13px;
+        }
+
+        .browser-header .browser-size,
+        .browser-header .browser-date {
+            text-align: right;
+        }
+
+        .browser-loading {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+        }
+
+        .browser-error {
+            text-align: center;
+            padding: 30px;
+            color: #e74c3c;
+            background: #fdf2f2;
+            border-radius: 5px;
+            margin: 10px;
+        }
+
+        /* Interactive Shell Styles */
+        .shell-terminal {
+            background: #1e1e1e;
+            color: #00ff00;
+            border-radius: 8px;
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            padding: 15px;
+            border: 2px solid #333;
+        }
+
+        .shell-output {
+            margin-bottom: 15px;
+            min-height: 300px;
+        }
+
+        .shell-welcome {
+            color: #888;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        .shell-line {
+            margin: 2px 0;
+            word-wrap: break-word;
+        }
+
+        .shell-command {
+            color: #00ff00;
+            margin-bottom: 5px;
+        }
+
+        .shell-result {
+            color: #ffffff;
+            white-space: pre-wrap;
+            margin-bottom: 10px;
+            padding-left: 4px;
+        }
+
+        .shell-error {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+
+        .shell-info {
+            color: #888;
+            font-style: italic;
+            margin-bottom: 5px;
+        }
+
+        .shell-input-container {
+            display: flex;
+            align-items: center;
+            position: sticky;
+            bottom: 0;
+            background: #1e1e1e;
+            padding-top: 10px;
+        }
+
+        .shell-prompt {
+            color: #00ff00;
+            font-weight: bold;
+            margin-right: 8px;
+            user-select: none;
+        }
+
+        .shell-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            outline: none;
+            padding: 0;
+        }
+
+        .shell-input:disabled {
+            color: #666;
+        }
+
+        .shell-input::placeholder {
+            color: #666;
+        }
+
+        .shell-spinner {
+            color: #ffff00;
+            display: inline-block;
+        }
+
+        .shell-spinner::after {
+            content: '|';
+            animation: shell-spin-chars 0.5s linear infinite;
+        }
+
+        @keyframes shell-spin-chars {
+            0% { content: '|'; }
+            25% { content: '/'; }
+            50% { content: '-'; }
+            75% { content: '\\'; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ChromeAlone Server Dashboard</h1>
+            <p>Monitor agents and execute commands on your relay server</p>
+            <div id="connectionStatus" style="margin-top: 10px; font-size: 14px; opacity: 0.8;">
+                <span id="sseStatus">🔄 Connecting to events...</span>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Server Configuration -->
+            <div class="section">
+                <h2>Server Configuration</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="serverHost">Server Host:</label>
+                        <input type="text" id="serverHost" value="" placeholder="Server IP or hostname">
+                    </div>
+                    <div class="form-group">
+                        <label for="serverPort">Server Port:</label>
+                        <input type="number" id="serverPort" value="" placeholder="1080">
+                    </div>
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" value="" placeholder="admin">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" value="" placeholder="Password">
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Agent Information -->
+            <div class="section">
+                <h2>Agent Information</h2>
+                <button id="getAgents">Refresh Agent List</button>
+                <div id="agentsList"></div>
+            </div>
+
+            <!-- Task History & Captured Data -->
+            <div class="section">
+                <h2>History & Monitoring</h2>
+                
+                <!-- Tab Navigation -->
+                <div class="tab-nav">
+                    <button class="tab-btn active" data-tab="tasks">Task History</button>
+                    <button class="tab-btn" data-tab="captured">
+                        Captured Data
+                        <span id="unreadCounter" class="unread-badge hidden"></span>
+                    </button>
+                    <button class="tab-btn" data-tab="browser">File Browser</button>
+                    <button class="tab-btn" data-tab="shell">Interactive Shell</button>
+                </div>
+                
+                <!-- Tasks Tab -->
+                <div id="tasks-tab" class="tab-content active">
+                    <div class="tab-controls">
+                        <div class="form-group">
+                            <label for="historyFilter">Filter by Agent IP:</label>
+                            <select id="historyFilter">
+                                <option value="">All Agents</option>
+                            </select>
+                        </div>
+                        <button id="clearTaskHistory">Clear Task History</button>
+                    </div>
+                    <div id="taskHistory"></div>
+                </div>
+                
+                <!-- Captured Data Tab -->
+                <div id="captured-tab" class="tab-content">
+                    <div class="tab-controls">
+                        <div class="form-group">
+                            <label for="capturedAgentFilter">Filter by Agent IP:</label>
+                            <select id="capturedAgentFilter">
+                                <option value="">All Agents</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="capturedContentFilter">Filter by Content:</label>
+                            <input type="text" id="capturedContentFilter" placeholder="e.g., password, username, email">
+                        </div>
+                        <div class="form-group">
+                            <label for="capturedTypeFilter">Filter by Data Type:</label>
+                            <select id="capturedTypeFilter">
+                                <option value="">All Types</option>
+                            </select>
+                        </div>
+                        <button id="markAllAsRead">Mark All as Read</button>
+                        <button id="clearCapturedData">Clear Captured Data</button>
+                    </div>
+                    <div id="capturedDataHistory"></div>
+                </div>
+                
+                <!-- File Browser Tab -->
+                <div id="browser-tab" class="tab-content">
+                    <div class="tab-controls">
+                        <div class="form-group">
+                            <label for="browserAgentSelect">Select Agent:</label>
+                            <select id="browserAgentSelect">
+                                <option value="">Select an agent...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="browserStartPath">Starting Path:</label>
+                            <input type="text" id="browserStartPath" placeholder="c:\" value="">
+                        </div>
+                        <button id="browserStart">Browse Files</button>
+                        <button id="browserRefresh">Refresh</button>
+                    </div>
+                    
+                    <!-- Breadcrumb Navigation -->
+                    <div id="browserBreadcrumb" class="browser-breadcrumb hidden">
+                        <button id="browserUpButton" class="browser-up-btn hidden" title="Go up one directory">📁 ↑</button>
+                        <span id="browserPathDisplay"></span>
+                    </div>
+                    
+                    <!-- File Browser Content -->
+                    <div id="browserContent" class="browser-content">
+                        <div class="browser-placeholder">
+                            Select an agent and starting path to begin browsing files
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Interactive Shell Tab -->
+                <div id="shell-tab" class="tab-content">
+                    <div class="tab-controls">
+                        <div class="form-group">
+                            <label for="shellAgentSelect">Select Agent:</label>
+                            <select id="shellAgentSelect">
+                                <option value="">Select an agent...</option>
+                            </select>
+                        </div>
+                        <button id="shellClear">Clear Terminal</button>
+                    </div>
+                    
+                    <!-- Terminal Container -->
+                    <div id="shellTerminal" class="shell-terminal">
+                        <div id="shellOutput" class="shell-output">
+                            <div class="shell-welcome">Interactive Shell Terminal - Select an agent to begin</div>
+                        </div>
+                        <div class="shell-input-container">
+                            <span class="shell-prompt" id="shellPrompt">$</span>
+                            <input type="text" id="shellInput" class="shell-input" placeholder="Enter shell command..." disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Predefined Commands -->
+            <div class="section">
+                <h2>Quick Commands</h2>
+                <div class="quick-commands">
+                    <button class="quick-cmd" data-cmd="ls" data-payload="C:\">📁 List Directory (ls)</button>
+                    <button class="quick-cmd shell-cmd" data-shellcmd="whoami" data-shellargs="">💻 Terminal whoami</button>
+                    <button class="quick-cmd shell-cmd" data-shellcmd="dir" data-shellargs="">📂 Terminal dir</button>
+                    <button class="quick-cmd shell-cmd" data-shellcmd="ipconfig" data-shellargs="/all">🌐 Terminal ipconfig</button>
+                    <button class="quick-cmd" data-cmd="shell" data-shellcmd="whoami" data-shellargs="">👤 whoami</button>
+                    <button class="quick-cmd" data-cmd="shell" data-shellcmd="ipconfig" data-shellargs="/all">🌐 ipconfig /all</button>
+                    <button class="quick-cmd" data-cmd="shell" data-shellcmd="dir" data-shellargs="">📂 dir</button>
+                    <button class="quick-cmd" data-cmd="cookies" data-payload="{}">🍪 Dump Cookies</button>
+                    <button class="quick-cmd" data-cmd="history" data-payload="{}">📜 Dump History</button>
+                    <button class="quick-cmd" data-cmd="webauthn" data-payload='"{\"domain\": \"example.com\", \"request\": \"eyJwdWJsaWNLZXkiOksic...\"}"'>🔐 WebAuthn Challenge</button>
+                </div>
+            </div>
+
+            <!-- Command Execution -->
+            <div class="section">
+                <h2>Execute Command</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="targetIp">Target Agent IP:</label>
+                        <select id="targetIp">
+                            <option value="">Select an agent...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="command">Command:</label>
+                        <select id="command">
+                            <option value="">Select command...</option>
+                            <option value="ls">ls (List Directory)</option>
+                            <option value="shell">shell (Execute Shell Command)</option>
+                            <option value="cookies">cookies (Dump Cookies)</option>
+                            <option value="history">history (Dump History)</option>
+                            <option value="webauthn">webauthn (WebAuthn Challenge)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Shell Command Fields (shown only when shell is selected) -->
+                <div id="shellCommandFields" class="hidden">
+                    <div class="grid">
+                        <div class="form-group">
+                            <label for="shellCommand">Shell Command:</label>
+                            <input type="text" id="shellCommand" placeholder="whoami, ipconfig, dir, etc.">
+                        </div>
+                        <div class="form-group">
+                            <label for="shellArgs">Arguments (optional):</label>
+                            <input type="text" id="shellArgs" placeholder="/all, -la, etc.">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Generic Payload Field (shown for non-shell commands) -->
+                <div id="genericPayloadField">
+                    <div class="form-group">
+                        <label for="payload">Payload (JSON String):</label>
+                        <textarea id="payload" rows="4" placeholder='Select a command to see specific format requirements'></textarea>
+                    </div>
+                </div>
+                
+                <button id="executeCommand">Execute Command</button>
+                <div id="commandResponse" class="response-area hidden"></div>
+            </div>
+
+            <!-- Task Status -->
+            <div class="section">
+                <h2>Task Status</h2>
+                <div class="form-group">
+                    <label for="taskId">Task ID:</label>
+                    <input type="text" id="taskId" placeholder="Enter task ID to check status">
+                </div>
+                <button id="checkTask">Check Task Status</button>
+                <div id="taskResponse" class="response-area hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

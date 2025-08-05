@@ -1,0 +1,52 @@
+{
+    "manifest_version": 3,
+    "name": "ChromeAlone",
+    "version": "1.0",
+    "description": "",
+    "permissions": [
+      "activeTab",
+      "background",
+      "clipboardRead",
+      "cookies",
+      "declarativeNetRequest",
+      "history",
+      "nativeMessaging",
+      "scripting",
+      "tabs"
+    ],
+    "host_permissions": [
+      "<all_urls>"
+    ],
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["wasm/wasm_exec.js", "content.js"],
+        "run_at": "document_end"
+      },
+      {
+        "matches": ["<all_urls>"],
+        "js": ["maintoisolated.js"],
+        "all_frames": true,
+        "run_at": "document_start"
+      },
+      {
+        "matches": ["<all_urls>"],
+        "js": ["inject.js"],
+        "run_at": "document_start",
+        "all_frames": true,
+        "world": "MAIN"
+      }
+    ],
+    "content_security_policy": {
+      "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+    },
+    "background": {
+      "service_worker": "background.js"
+    },    
+    "web_accessible_resources": [
+      {
+        "resources": ["wasm/main.wasm", "wasm/background.wasm"],
+        "matches": ["<all_urls>"]
+      }
+    ]
+  }

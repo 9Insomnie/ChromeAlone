@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    
+    <!-- Explicitly set the assembly name -->
+    <AssemblyName>ProcessHelper</AssemblyName>
+    
+    <!-- Disable PDB generation -->
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    
+    <!-- Intermediate output path (will still have netstandard2.0 folder) -->
+    <OutputPath>obj</OutputPath>
+    
+    <!-- Clean output directory on build -->
+    <CleanOutputPath>true</CleanOutputPath>
+    
+    <!-- Don't generate deps.json and other files -->
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
+    
+    <!-- Suppress warnings about missing XML documentation -->
+    <NoWarn>1591</NoWarn>
+    
+    <!-- Define the final output directory -->
+    <FinalOutputPath>dist</FinalOutputPath>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <Compile Include="ProcessHelper.cs" />
+    <PackageReference Include="PowerShellStandard.Library" Version="5.1.0" />
+  </ItemGroup>
+  
+  <!-- Custom target to copy the DLL to the final location without netstandard2.0 folder -->
+  <Target Name="CopyToFinalOutput" AfterTargets="Build">
+    <!-- Create the final output directory if it doesn't exist -->
+    <MakeDir Directories="$(FinalOutputPath)" />
+    
+    <!-- Copy the DLL to the final output directory -->
+    <Copy SourceFiles="$(OutputPath)\$(AssemblyName).dll" 
+          DestinationFolder="$(FinalOutputPath)" />
+
+    <!-- Optional: Display a message -->
+    <Message Text="DLL copied to $(FinalOutputPath)\$(AssemblyName).dll" Importance="high" />
+  </Target>
+  
+  <!-- Custom target to clean up the obj folder after successful build and copy -->
+  <Target Name="CleanupObjFolder" AfterTargets="CopyToFinalOutput">
+    <!-- Delete the obj folder -->
+    <RemoveDir Directories="obj" />
+    <Message Text="Cleaned up obj folder" Importance="high" />
+  </Target>
+</Project>
