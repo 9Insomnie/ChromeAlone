@@ -23,13 +23,14 @@ There are currently two supported deployment modes. Note that in either case, yo
 
 ### Deployment from scratch via AWS
 
-For this you'll need to have an AWS account configured with your credentials stored in `~/.aws/credentials`. Make sure your account has full EC2 write permissions along with Route53 permissions. Additionally it's assumed that your Route53 has been configured with at least 1 hosting zone containing a registered domain. If these conditions are met, then you can run:
+For this you'll need to have an AWS account configured with your credentials stored in `~/.aws/credentials`. Make sure your account has full EC2 write permissions along with Route53 permissions. Additionally it's assumed that your Route53 has been configured with at least 1 hosting zone containing a registered domain. If these conditions are met, then you can run this command.
 
 ```
-docker run --rm -v $(pwd):/project -v ~/.aws:/root/.aws chromealone --domain=sendmea.click --appname=UpdateService
+docker run --rm -v $(pwd):/project -v ~/.aws:/root/.aws chromealone --domain=sendmea.click --appname=UpdateService --region=us-west-2
 ```
 
 The `domain` value should match a domain under the control of your Route53 setup. `appname` can be whatever value you want, and will be used for naming several registry keys and folders on disk when deploying. It is recommended to use a fairly benign name like `UpdateService` or something equally innocuous.
+Note that `region` is optional, and will default to `us-east-2` if not specified.
 
 This will deploy the BATTLEPLAN relay server to AWS and generate the following artifacts:
 
