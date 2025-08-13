@@ -19,7 +19,7 @@ First build the docker container: `docker build -t chromealone .`
 
 ## Deployment Instructions
 
-There are currently two supported deployment modes:
+There are currently two supported deployment modes. Note that in either case, you should be running `docker` from the base directory of the ChromeAlone git repository.
 
 ### Deployment from scratch via AWS
 

@@ -3,7 +3,7 @@ set -e
 
 # Parse command line arguments
 DOMAIN_NAME=""
-AWS_REGION="us-east-2"  # Default region
+AWS_REGION="us-east-2"  # Default region (matches build.sh default)
 while [[ $# -gt 0 ]]; do
   case $1 in
     --domain)
@@ -51,9 +51,10 @@ cd "$DEPLOY_DIR"
 
 # Create SSH key pair if it doesn't exist
 KEY_NAME="relay-proxy-key"
-if ! aws ec2 describe-key-pairs --key-names "$KEY_NAME" &> /dev/null; then
-    echo "Creating new SSH key pair..."
+if ! aws ec2 describe-key-pairs --region "$AWS_REGION" --key-names "$KEY_NAME" &> /dev/null; then
+    echo "Creating new SSH key pair in region $AWS_REGION..."
     aws ec2 create-key-pair \
+        --region "$AWS_REGION" \
         --key-name "$KEY_NAME" \
         --query 'KeyMaterial' \
         --output text > "${KEY_NAME}.pem"

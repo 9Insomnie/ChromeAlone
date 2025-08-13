@@ -1,7 +1,7 @@
 variable "aws_region" {
   description = "AWS region to deploy resources"
   type        = string
-  default     = "us-west-2"
+  default     = "us-east-2"
 }
 
 variable "office_ip_range" {
@@ -14,9 +14,9 @@ variable "office_ip_range" {
 }
 
 variable "ami_id" {
-  description = "AMI ID for relay server"
+  description = "AMI ID for relay server (leave empty to use latest Amazon Linux 2023)"
   type        = string
-  default     = "ami-0e0bf53f6def86294"  # Amazon Linux 2023 for us-east-2
+  default     = "" # Will be auto-detected using data source
 }
 
 variable "instance_type" {
@@ -51,6 +51,12 @@ variable "proxy_pass" {
 variable "domain_name" {
   description = "Domain name to use for the relay server (e.g., relay.example.com)"
   type        = string
-  default     = ""  # Optional, deployment will work without a domain
+  default     = "" # Optional, deployment will work without a domain
+}
+
+variable "existing_eip_allocation_id" {
+  description = "Existing Elastic IP allocation ID to use instead of creating a new one"
+  type        = string
+  default     = "" # If empty, a new EIP will be created
 }
 

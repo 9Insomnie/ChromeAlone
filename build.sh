@@ -6,16 +6,18 @@ DOMAIN_NAME=""
 APP_NAME="com.chrome.alone"
 OUTPUT_NAME="sideloader.ps1"
 TFVARS_FILE=""
+AWS_REGION="us-east-2"  # Default region
 
 # Function to display usage information
 show_usage() {
-  echo "Usage: $0 [--domain=example.com] [--appname=com.chrome.alone] [--output=sideloader.ps1] [--tfvars=path/to/terraform.tfvars]"
+  echo "Usage: $0 [--domain=example.com] [--appname=com.chrome.alone] [--output=sideloader.ps1] [--tfvars=path/to/terraform.tfvars] [--region=us-east-2]"
   echo ""
   echo "Arguments:"
   echo "  --domain=DOMAIN    Domain name for the relay server (required unless --tfvars is provided)"
   echo "  --appname=NAME     Custom app name (optional, default: com.chrome.alone)"
   echo "  --output=NAME      Output file name (optional, default: sideloader.ps1)"
   echo "  --tfvars=PATH      Path to existing terraform.tfvars file (skips terraform deployment)"
+  echo "  --region=REGION    AWS region for deployment (optional, default: us-east-2)"
   echo ""
 }
 
@@ -36,6 +38,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --tfvars=*)
       TFVARS_FILE="${1#*=}"
+      shift
+      ;;
+    --region=*)
+      AWS_REGION="${1#*=}"
       shift
       ;;
     --help|-h)
@@ -69,6 +75,7 @@ if [ -n "$TFVARS_FILE" ]; then
 else
   echo "Domain Name: $DOMAIN_NAME"
 fi
+echo "AWS Region: $AWS_REGION"
 echo "App Name: ${APP_NAME:-Using default com.chrome.alone}"
 echo "Output Name: ${OUTPUT_NAME:-Using default sideloader.ps1}"
 
@@ -124,7 +131,7 @@ if [ -n "$TFVARS_FILE" ]; then
 else
   echo "Step 1: Running .deploy-relay.sh from BATTLEPLAN/ directory"
   cd "$PROJECT_ROOT/BATTLEPLAN"
-  bash ./deploy-relay.sh --domain "$DOMAIN_NAME"
+  bash ./deploy-relay.sh --domain "$DOMAIN_NAME" --region "$AWS_REGION"
 fi
 
 # Extract domain_name and relay_token from terraform.tfvars
@@ -186,8 +193,8 @@ cp -r ./HOTWHEELS/extension/ ./output/extension/
 cp ./PAINTBUCKET/ContentScriptInject/*.js ./output/extension/
 
 # Step 4b: Build the WASM files
-GOOS=js GOARCH=wasm go build -trimpath -ldflags "-s -w" -o ./output/extension/wasm/main.wasm ./HOTWHEELS/wasm/content-script/
-GOOS=js GOARCH=wasm go build -trimpath -ldflags "-s -w -X main.EXTENSION_NAME=$APP_NAME" -o output/extension/wasm/background.wasm ./HOTWHEELS/wasm/background-script/
+GOOS=js GOARCH=wasm go build -buildvcs=false -trimpath -ldflags "-s -w" -o ./output/extension/wasm/main.wasm ./HOTWHEELS/wasm/content-script/
+GOOS=js GOARCH=wasm go build -buildvcs=false -trimpath -ldflags "-s -w -X main.EXTENSION_NAME=$APP_NAME" -o output/extension/wasm/background.wasm ./HOTWHEELS/wasm/background-script/
 
 # Step 4c: build the native messaging host
 dotnet build -c Release -r win-x64 -o output/extension/ ./DOORKNOB/ExtensionSideloader/dotnet/NativeAppHost/NativeAppHost.csproj
