@@ -91,7 +91,7 @@ The ChromeAlone repository is broken down into components, many of which could b
 
 # Who made this?
 
-This tool has been written by [Mike Weber](https://www.linkedin.com/in/michael-weber-6a466517/) of Praetorian Security.
+This tool has been written by [Mike Weber](https://www.linkedin.com/in/michael-weber-6a466517/) of [Praetorian Security](https://www.praetorian.com/).
 
 # License
 
