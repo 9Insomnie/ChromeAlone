@@ -93,6 +93,25 @@ The ChromeAlone repository is broken down into components, many of which could b
 
 This tool has been written by [Mike Weber](https://www.linkedin.com/in/michael-weber-6a466517/) of [Praetorian Security](https://www.praetorian.com/).
 
+# References
+
+This work is built on the shoulders of many other researcher tools and blog posts who have contributed to the space. Without their work, this project would not exist. If you're looking to dig deeper into the internals that this project makes use of, I suggest reading the following resources:
+
+* Silent Chrome -  https://github.com/asaurusrex/Silent_Chrome
+* Return of the Extension - https://syntax-err0r.github.io/Return_Of_The_Extension.html
+* CursedChrome - https://github.com/mandatoryprogrammer/CursedChrome
+* https://www.adlice.com/google-chrome-secure-preferences/
+* Browser Extension Supply Chain Attacks - https://www.darktrace.com/blog/cyberhaven-supply-chain-attack-exploiting-browser-extensions
+* LummaC2 Sideloading - https://www.esentire.com/blog/lummac2-malware-and-malicious-chrome-extension-delivered-via-dll-side-loading
+* BlinkOn 19 - https://www.youtube.com/watch?v=Q3b5NB-7HQQ
+* RedExt - https://github.com/Darkrain2009/RedExt
+* Browser Syncjacking - https://labs.sqrx.com/browser-syncjacking-cc602ea0cbd0
+* Isolated Web Apps Explainer - https://github.com/WICG/isolated-web-apps
+* LevelDB Writeup - https://www.cclsolutionsgroup.com/post/hang-on-thats-not-sqlite-chrome-electron-and-leveldb
+* DirectSockets Explainer - https://wicg.github.io/direct-sockets/
+* WebUSB Yubikey Phishing - https://www.wired.com/story/chrome-yubikey-phishing-webusb/
+* Offensive Browser Extension Development - https://www.irongeek.com/i.php?page=videos/derbycon8/track-4-02-offensive-browser-extension-development-michael-weber
+
 # License
 
 ChromeAlone is licensed under the Apache License, Version 2.0.
